@@ -10,7 +10,7 @@ public:
 	~Clock();
 
 private:
-	unsigned int ms;
+	unsigned long int ms;
 	bool displayClock;
 	bool leapYear;
 
@@ -20,6 +20,7 @@ private:
 	unsigned int day;
 	unsigned int week;
 	unsigned int month;
+	unsigned int dayOfMonth;
 	int year;
 
 private:
@@ -27,13 +28,14 @@ private:
 	void updateClock();
 	void clockLoop();
 	void displayTime();
-	std::string formatTime();
 	void setTimeNow();
 	bool isLeapYear();
 
 public:
-	unsigned int getTime();
-	unsigned int getMonth();
+	std::string getFormatTime();
+	unsigned long int getms();
+	unsigned int getMonthSetDay();
+	std::string getMonthName(unsigned int monthNum);
 
 	unsigned int getSecond();
 	unsigned int getMinute();
@@ -48,4 +50,3 @@ public:
 	void setYear(unsigned int year);
 
 };
-
