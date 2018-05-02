@@ -27,6 +27,7 @@ Clock::Clock()
 
 	this->month = 1;
 	this->dayOfMonth = 1;
+	this->timeZone = +1;
 
 	this->ms = 0;
 	this->setTimeNow();
@@ -43,6 +44,7 @@ Clock::Clock(long long int year, unsigned int day, unsigned int hour, unsigned i
 
 	this->month = 1;
 	this->dayOfMonth = 1;
+	this->timeZone = 1;
 	
 	this->ms = 0;
 	this->clockLoop();
@@ -90,8 +92,8 @@ unsigned long long int Clock::getms()
 	std::chrono::milliseconds millisec = std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::system_clock::now().time_since_epoch()
 	);
-	unsigned long long int now_ms = (unsigned long long int)millisec.count();// +150000000;
-	
+	unsigned long long int ms = (unsigned long long int)millisec.count();// +150000000;
+
 	//long double sysTime = time(0);
 	//long double sysTimeMS = sysTime * 1000;
 	//unsigned long int ms = (unsigned long int)sysTimeMS;
@@ -111,13 +113,14 @@ unsigned long long int Clock::getms()
 
 	//std::cout << std::to_string(ms) << std::endl;
 
-	return now_ms;
+	ms = ms + timeZone * 3600;
+	return ms;
 }
 
 /// Check if clock needs an update (if 1 second has passed since last).
 bool Clock::updateNeeded()
 {
-	if (this->getms() < this->ms + 1000)
+	if (this->getms() <= this->ms + 1000)
 		return false;
 	return true;
 }
@@ -222,7 +225,7 @@ void Clock::updateClock()
 				/// Days
 				unsigned int daysInYear = 365;
 				if(this->leapYear)
-					daysInYear = 366;
+					daysInYear++;
 
 				if (this->day >= daysInYear - 0)
 				{
@@ -233,14 +236,20 @@ void Clock::updateClock()
 					else
 						this->leapYear = false;
 					this->day = 1;
+					this->hour = 0;
+					this->minute = 0;
+					this->second = 0;
 					return;
 				}
 				this->day++;
 				this->hour = 0;
+				this->minute = 0;
+				this->second = 0;
 				return;
 			}
 			this->hour++;
 			this->minute = 0;
+			this->second = 0;
 			return;
 		}
 		this->minute++;
@@ -439,10 +448,8 @@ bool Clock::isLeapYear()
 
 	if (y % 4 == 0)
 		isLeap = true;
-	if (y % 100 == 0)
+	if (y % 100 == 0 && y % 400 != 0)
 		isLeap = false;
-	if (y % 400 == 0)
-		isLeap = true;
 
 	return isLeap;
 }

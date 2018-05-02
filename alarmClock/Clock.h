@@ -13,6 +13,7 @@ private:
 	unsigned long long int ms;
 	bool displayClock;
 	bool leapYear;
+	int timeZone;
 
 	unsigned int second;
 	unsigned int minute;
