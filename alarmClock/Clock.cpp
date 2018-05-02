@@ -2,19 +2,8 @@
 #include "Clock.h"
 
 #include <iostream>		// std::cout etc.
-//#include <string>		// string for output
 #include <stdlib.h>		// Clearing console screen
-#include <thread>		// For threading
-
 #include <chrono>		// Get time
-//#include <ctime>		// Get time
-//#include <time.h>		// Get time
-//#include <inttypes.h>
-//#include <math.h>
-//#include <stdio.h>
-
-#include <cwchar>		// Font size
-#include <windows.h>	// Font size
 
 
 Clock::Clock()
@@ -69,7 +58,6 @@ void Clock::setYear(unsigned int year) { this->year = year; }
 /// Main clock loop.
 void Clock::clockLoop()
 {
-	//this->ms = 0;
 	this->displayClock = true;
 
 	while (true)
@@ -94,25 +82,6 @@ unsigned long long int Clock::getms()
 	);
 	unsigned long long int ms = (unsigned long long int)millisec.count();// +150000000;
 
-	//long double sysTime = time(0);
-	//long double sysTimeMS = sysTime * 1000;
-	//unsigned long int ms = (unsigned long int)sysTimeMS;
-	//std::cout << std::to_string(sysTimeMS) << std::endl;
-
-	//time_t seconds;
-	//seconds = time(NULL);
-	//ms = (unsigned long int)seconds * 1000;
-	//std::cout << seconds << std::endl;
-
-	//auto now = std::chrono::system_clock::now();
-	//auto seconds = std::chrono::time_point_cast<std::chrono::seconds>(now);
-	//auto fraction = now - seconds;
-	//time_t cnow = std::chrono::system_clock::to_time_t(now);
-	//auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(fraction);
-	//unsigned long int ms = milliseconds.count();
-
-	//std::cout << std::to_string(ms) << std::endl;
-
 	ms = ms + timeZone * 3600;
 	return ms;
 }
@@ -129,14 +98,14 @@ bool Clock::updateNeeded()
 void Clock::displayTime()
 {
 	/// Flush and clear screen.
-	//std::cout << std::flush;
 	system("CLS");
 
 	/// cout the time/date.
 	this->month = this->getMonthSetDay();
 	std::string currentMonth = this->getMonthName(this->month);
 	
-	std::cout << "yyyy" << ":" << "mm" << ":" << "dd" << " - " << "hh" << ":" << "mm" << ":" << "ss" << std::endl;
+	std::cout << "yyyy" << ":" << "mm" << ":" << "dd"<< " - "
+		<< "hh" << ":" << "mm" << ":" << "ss" << std::endl;
 	std::cout << this->getFormatTime() << std::endl;
 	std::cout << currentMonth << std::endl;
 	std::cout << this->getms() << std::endl;
@@ -409,21 +378,8 @@ void Clock::setTimeNow()
 	this->year = 1970;
 	unsigned long long int secondsFromEpoch = this->getms() / 1000;
 	unsigned long long int epochToStart = secondsFromEpoch;
+
 	int perCount = 1;
-	/*
-	for (unsigned long int i = 0; i < now; i++)
-	{
-		/// Display how far in the time set process it has come.
-		if ((start - now) > perCount*0.01*start)
-		{
-			std::cout << perCount << "%" << std::endl;
-			perCount++;
-		}
-		
-		this->updateClock();
-	}
-	*/
-	
 	while (secondsFromEpoch > 0)
 	{
 		/// Display how far in the time set process it has come.
@@ -436,8 +392,6 @@ void Clock::setTimeNow()
 		this->updateClock();
 		secondsFromEpoch--;
 	}
-	
-	//this->year += 1970;
 }
 
 /// Return true if the year is a leap year.
