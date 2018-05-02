@@ -111,8 +111,8 @@ void Clock::displayTime()
 	std::cout << this->getFormatTimeAsText1() << std::endl;
 	std::cout << this->getFormatTimeAsText2() << std::endl;
 	std::cout << this->getFormatTime() << std::endl;
-	std::cout << currentMonth << std::endl;
-	std::cout << this->day << std::endl;
+	//std::cout << currentMonth << std::endl;
+	//std::cout << this->day << std::endl;
 	std::cout << "\nms since epoch:\t" << this->getms() << std::endl;
 }
 
@@ -428,8 +428,10 @@ std::string Clock::getMonthName(unsigned int monthNum)
 /// Get week number (1 - 52/53)
 unsigned int Clock::getWeekNumber()
 {
-	
-	return 0;
+	/// Works only when the first day of the year is a Monday.
+	unsigned int currentWeekday = this->getWeekdayNumber();
+	unsigned int weekNumber = (unsigned int)((this->day - currentWeekday) / 7 + 1);
+	return weekNumber;
 }
 
 /// Get weekday number (1, 2, ..)
