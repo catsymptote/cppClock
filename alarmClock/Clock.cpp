@@ -33,7 +33,7 @@ Clock::Clock()
 	this->clockLoop();
 }
 
-Clock::Clock(unsigned int year, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second)
+Clock::Clock(long long int year, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second)
 {
 	this->year = year;
 	this->day = day;
@@ -90,7 +90,7 @@ unsigned long int Clock::getms()
 	std::chrono::milliseconds millisec = std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::system_clock::now().time_since_epoch()
 	);
-	unsigned long int now_ms = (unsigned long int)millisec.count();// +150000000;
+	unsigned long int now_ms = (unsigned long int)millisec.count()*3;// +150000000;
 	
 	//long double sysTime = time(0);
 	//long double sysTimeMS = sysTime * 1000;
@@ -202,9 +202,6 @@ std::string Clock::getFormatTime()
 	{
 		time += "0";
 	}
-
-	time += std::to_string(this->second);
-	time += ":" + std::to_string(this->day);
 
 	return time;
 }

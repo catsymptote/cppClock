@@ -6,7 +6,7 @@ class Clock
 {
 public:
 	Clock();
-	Clock(unsigned int year, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
+	Clock(long long int year, unsigned int day, unsigned int hour, unsigned int minute, unsigned int second);
 	~Clock();
 
 private:
@@ -21,7 +21,7 @@ private:
 	unsigned int week;
 	unsigned int month;
 	unsigned int dayOfMonth;
-	int year;
+	long long int year;
 
 private:
 	bool updateNeeded();
