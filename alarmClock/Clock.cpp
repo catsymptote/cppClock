@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Clock.h"
 
-#include <iostream>		// std::cout etc.
+#include <iostream>		// For std::cout and std::endl
 #include <stdlib.h>		// Clearing console screen
 #include <chrono>		// Get time
 
@@ -44,19 +44,6 @@ Clock::Clock(long long int year, unsigned int day, unsigned int hour, unsigned i
 Clock::~Clock() {}
 
 
-unsigned int Clock::getSecond() { return this->second; }
-unsigned int Clock::getMinute() { return this->minute; }
-unsigned int Clock::getHour() { return this->hour; }
-unsigned int Clock::getDay() { return this->day; }
-unsigned int Clock::getYear() { return this->year; }
-
-void Clock::setSecond(unsigned int second) { if (second < 60) this->second = second; }
-void Clock::setMinute(unsigned int minute){ if (minute < 60) this->minute = minute; }
-void Clock::setHour(unsigned int hour) { if (hour < 24) this->hour = hour; }
-void Clock::setDay(unsigned int day) { if (day < 366 && day > 0) this->day = day; }
-void Clock::setYear(unsigned int year) { this->year = year; }
-
-
 /// Main clock loop.
 void Clock::clockLoop()
 {
@@ -79,12 +66,15 @@ void Clock::clockLoop()
 /// Return (milli)seconds since epoch (1970).
 unsigned long long int Clock::getms()
 {
+	/// Get milliseconds since epoch.
 	std::chrono::milliseconds millisec = std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::system_clock::now().time_since_epoch()
 	);
-	unsigned long long int ms = (unsigned long long int)millisec.count();// +150000000;
+	unsigned long long int ms = (unsigned long long int)millisec.count();
 
+	/// Add timeZone changer, add 2 days (because reasons), subtract 27 leap seconds.
 	ms = ms + timeZone * 3600000 + 2 * 86400000 - 27000;
+	this->ms = ms;
 	return ms;
 }
 
@@ -94,9 +84,7 @@ bool Clock::updateNeeded()
 	bool needUpdate = true;
 	unsigned int thisMsMod = this->getms() % 1000;
 	if (thisMsMod < this->lastMsMod)
-	{
 		return false;
-	}
 	this->lastMsMod = thisMsMod;
 	return needUpdate;
 }
@@ -108,25 +96,19 @@ void Clock::displayTime()
 	system("CLS");
 
 	/// cout the time/date.
-	this->month = this->getMonthSetDay();
-	std::string currentMonth = this->getMonthName(this->month);
-	
-	//std::cout << "yyyy" << ":" << "mm" << ":" << "dd"<< " - "
-	//	<< "hh" << ":" << "mm" << ":" << "ss" << std::endl;
-	std::cout << this->getFormatTimeAsText1() << std::endl;
-	std::cout << this->getFormatTimeAsText2() << std::endl;
 	std::cout << this->getFormatTime() << std::endl;
-	//std::cout << currentMonth << std::endl;
-	//std::cout << this->day << std::endl;
-	std::cout << "\nms since epoch:\t" << this->getms() << std::endl;
+
+	this->month = this->getMonthSetDay();
+	std::cout << this->getFormatTimeAsText1() << std::endl;
+	//std::cout << this->getFormatTimeAsText2() << std::endl;
+	
+	std::cout << "ms since epoch:\t" << this->getms() << std::endl;
 }
 
 /// Get the formatted time.
 std::string Clock::getFormatTime()
 {
-	std::string time = "";
-
-	time += "yyyy:mm:dd - hh:mm:ss\n";
+	std::string time = "\nyyyy:mm:dd - hh:mm:ss\n";
 
 	/// Year
 	if (this->year < 1000)
@@ -187,6 +169,7 @@ std::string Clock::getFormatTime()
 		time += "0";
 	}
 	time += std::to_string(this->second);
+	time += "\n";
 
 	return time;
 }
@@ -197,7 +180,7 @@ std::string Clock::getFormatTimeAsText1()
 	std::string text = this->getMonthName(this->month) + " " +	// month
 		std::to_string(this->dayOfMonth) +						// day of month
 		this->getDayExtension(this->dayOfMonth) + ", " +		// day extension
-		std::to_string(this->year);								// year
+		std::to_string(this->year) + "\n";						// year
 
 	return text;
 }
@@ -206,10 +189,10 @@ std::string Clock::getFormatTimeAsText1()
 std::string Clock::getFormatTimeAsText2()
 {
 	std::string text = this->getWeekdayName(this->getWeekdayNumber()) + ", the " +	// weekday
-		std::to_string(this->dayOfMonth) +	// day of month
-		this->getDayExtension(this->dayOfMonth) + " of " + 
-		this->getMonthName(this->month)	// month
-		+ ", in the year " + std::to_string(this->year);	// year
+		std::to_string(this->dayOfMonth) +						// day of month
+		this->getDayExtension(this->dayOfMonth) + " of " +		// day extension
+		this->getMonthName(this->month)							// month
+		+ ", in the year " + std::to_string(this->year) + "\n";	// year
 
 	return text;
 }
@@ -217,14 +200,14 @@ std::string Clock::getFormatTimeAsText2()
 /// Updates the numbers. Adds 1 second to time.
 void Clock::updateClock(unsigned int sec)
 {
-	/// Rough for seconds per day
+	/// Add entire days at a time.
 	if (sec == 86400)
 	{
 		this->incrementDay();
 		return;
 	}
 	
-	/// Recursion. Why? Because reasons!
+	/// Recursion (because reasons).
 	if (!(sec == 86400 || sec == 1))
 	{
 		updateClock(1);
@@ -232,7 +215,7 @@ void Clock::updateClock(unsigned int sec)
 		return;
 	}
 	
-	/// Indicidual increments
+	/// Indicidual increments.
 	/// Seconds
 	if (this->second >= 60 - 1)
 	{
@@ -295,20 +278,19 @@ unsigned int Clock::getMonthSetDay()
 
 	/// January
 	if (d <= 31)
-	{
+	{	
 		this->dayOfMonth = d;
 		return 1;
 	}
 	d -= 31;
-
+	
 	/// February
 	unsigned int daysInFeb = 28;
 	if (this->leapYear)
-		daysInFeb = 29;
+		daysInFeb++;
 	if (d <= daysInFeb)
 	{
 		this->dayOfMonth = d;
-		std::cout << this->dayOfMonth << std::endl;
 		return 2;
 	}
 	d -= daysInFeb;
@@ -392,7 +374,7 @@ unsigned int Clock::getMonthSetDay()
 		return 12;
 	}
 	
-	std::cout << "Month error" << std::endl;
+	std::cout << "[Error! Month not found]" << std::endl;
 	return 0;
 }
 
@@ -442,9 +424,7 @@ unsigned int Clock::getWeekNumber()
 /// Get weekday number (1, 2, ..)
 unsigned int Clock::getWeekdayNumber()
 {
-	unsigned long int secondsSinceEpoch = this->ms / 1000;
-	unsigned int daysSinceEpoch = secondsSinceEpoch / 86400;
-
+	unsigned int daysSinceEpoch = this->ms / (1000 * 86400);
 	return ((daysSinceEpoch +1) % 7) + 1;
 }
 
@@ -475,13 +455,6 @@ std::string Clock::getWeekdayName(unsigned int weekday)
 /// Get text extension to day (st, nd, th).
 std::string Clock::getDayExtension(unsigned int day)
 {
-	/*
-		Ends with:
-		1			: st
-		2			: nd
-		Otherwise	: th
-	*/
-	//std::string extension = "";
 	if (day % 10 == 1)
 		return "st";
 	else if (day % 10 == 2)
@@ -504,25 +477,24 @@ void Clock::setTimeNow()
 	while (secondsFromEpoch > 0)
 	{
 		/// Display how far in the time set process it has come.
-		if ((epochToStart - secondsFromEpoch) > 5*perCount*0.01*epochToStart)
+		if ((epochToStart - secondsFromEpoch) > 10*perCount*0.01*epochToStart)
 		{
-			std::cout << 5*perCount << "%" << std::endl;
+			std::cout << 10*perCount << "%" << std::endl;
 			perCount++;
 		}
 		
+		/// If more than 1 day, send entire day at once.
 		if (secondsFromEpoch >= 86400)
 		{
-			
 			this->updateClock(86400);
 			secondsFromEpoch -= 86400;
 		}
+		/// If less than 1 day, send second by second.
 		else
 		{
 			this->updateClock(1);
 			secondsFromEpoch--;
 		}
-		
-		
 	}
 }
 
