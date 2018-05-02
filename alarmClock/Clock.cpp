@@ -84,7 +84,7 @@ unsigned long long int Clock::getms()
 	);
 	unsigned long long int ms = (unsigned long long int)millisec.count();// +150000000;
 
-	ms = ms + timeZone * 3600000;
+	ms = ms + timeZone * 3600000 + 2 * 86400000;
 	return ms;
 }
 
