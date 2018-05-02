@@ -11,10 +11,11 @@ Clock::Clock()
 	this->second = 0;
 	this->minute = 0;
 	this->hour = 0;
-	this->day = 1;
+	this->day = 0;
 	this->year = 0;
 
 	this->month = 1;
+	this->weekOfYear = 1;
 	this->dayOfMonth = 1;
 	this->timeZone = 2;
 
@@ -32,6 +33,7 @@ Clock::Clock(long long int year, unsigned int day, unsigned int hour, unsigned i
 	this->second = second;
 
 	this->month = 1;
+	this->weekOfYear = 1;
 	this->dayOfMonth = 1;
 	this->timeZone = 2;
 	
@@ -104,17 +106,22 @@ void Clock::displayTime()
 	this->month = this->getMonthSetDay();
 	std::string currentMonth = this->getMonthName(this->month);
 	
-	std::cout << "yyyy" << ":" << "mm" << ":" << "dd"<< " - "
-		<< "hh" << ":" << "mm" << ":" << "ss" << std::endl;
+	//std::cout << "yyyy" << ":" << "mm" << ":" << "dd"<< " - "
+	//	<< "hh" << ":" << "mm" << ":" << "ss" << std::endl;
+	std::cout << this->getFormatTimeAsText1() << std::endl;
+	std::cout << this->getFormatTimeAsText2() << std::endl;
 	std::cout << this->getFormatTime() << std::endl;
 	std::cout << currentMonth << std::endl;
-	std::cout << this->getms() << std::endl;
+	std::cout << this->day << std::endl;
+	std::cout << "\nms since epoch:\t" << this->getms() << std::endl;
 }
 
 /// Get the formatted time.
 std::string Clock::getFormatTime()
 {
 	std::string time = "";
+
+	time += "yyyy:mm:dd - hh:mm:ss\n";
 
 	/// Year
 	if (this->year < 1000)
@@ -177,6 +184,29 @@ std::string Clock::getFormatTime()
 	time += std::to_string(this->second);
 
 	return time;
+}
+
+/// Display the time as text v1.
+std::string Clock::getFormatTimeAsText1()
+{
+	std::string text = this->getMonthName(this->month) + " " +	// month
+		std::to_string(this->dayOfMonth) +						// day of month
+		this->getDayExtension(this->dayOfMonth) + ", " +		// day extension
+		std::to_string(this->year);								// year
+
+	return text;
+}
+
+/// Display the time as text v2.
+std::string Clock::getFormatTimeAsText2()
+{
+	std::string text = this->getWeekdayName(this->getWeekdayNumber()) + ", the " +	// weekday
+		std::to_string(this->dayOfMonth) +	// day of month
+		this->getDayExtension(this->dayOfMonth) + " of " + 
+		this->getMonthName(this->month)	// month
+		+ ", in the year " + std::to_string(this->year);	// year
+
+	return text;
 }
 
 /// Updates the numbers. Adds 1 second to time.
@@ -391,8 +421,68 @@ std::string Clock::getMonthName(unsigned int monthNum)
 		case 12:
 			return "December";
 		default:
-			return "Month not found!";
+			return "[Month not found]";
 	}
+}
+
+/// Get week number (1 - 52/53)
+unsigned int Clock::getWeekNumber()
+{
+	
+	return 0;
+}
+
+/// Get weekday number (1, 2, ..)
+unsigned int Clock::getWeekdayNumber()
+{
+	unsigned long int secondsSinceEpoch = this->ms / 1000;
+	unsigned int daysSinceEpoch = secondsSinceEpoch / 86400;
+
+	return ((daysSinceEpoch +1) % 7) + 1;
+}
+
+/// Get weekday name (Monday, Tuesday, ..).
+std::string Clock::getWeekdayName(unsigned int weekday)
+{
+	switch (weekday)
+	{
+		case 1:
+			return "Monday";
+		case 2:
+			return "Tuesday";
+		case 3:
+			return "Wednesday";
+		case 4:
+			return "Thursday";
+		case 5:
+			return "Friday";
+		case 6:
+			return "Saturday";
+		case 7:
+			return "Sunday";
+		default:
+			return "[Weekday not found]";
+	}
+}
+
+/// Get text extension to day (st, nd, th).
+std::string Clock::getDayExtension(unsigned int day)
+{
+	/*
+		Ends with:
+		1			: st
+		2			: nd
+		Otherwise	: th
+	*/
+	//std::string extension = "";
+	if (day % 10 == 1)
+		return "st";
+	else if (day % 10 == 2)
+		return "nd";
+	else if (day % 10 == 3)
+		return "rd";
+	else
+		return "th";
 }
 
 /// Add 1 second to the time per 1000 ms. (really slow atm due to Clock::updateTime() being ineffective when more than 1 second is added at a time.

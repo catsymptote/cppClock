@@ -20,6 +20,7 @@ private:
 	unsigned int hour;
 	unsigned int day;
 	unsigned int week;
+	unsigned int weekOfYear;
 	unsigned int month;
 	unsigned int dayOfMonth;
 	long long int year;
@@ -35,9 +36,15 @@ private:
 
 public:
 	std::string getFormatTime();
+	std::string getFormatTimeAsText1();
+	std::string getFormatTimeAsText2();
 	unsigned long long int getms();
 	unsigned int getMonthSetDay();
 	std::string getMonthName(unsigned int monthNum);
+	unsigned int getWeekNumber();
+	unsigned int getWeekdayNumber();
+	std::string getWeekdayName(unsigned int weekday);
+	std::string getDayExtension(unsigned int day);
 
 	unsigned int getSecond();
 	unsigned int getMinute();
