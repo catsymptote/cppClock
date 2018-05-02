@@ -16,7 +16,7 @@ Clock::Clock()
 
 	this->month = 1;
 	this->dayOfMonth = 1;
-	this->timeZone = +1;
+	this->timeZone = 2;
 
 	this->ms = 0;
 	this->setTimeNow();
@@ -33,7 +33,7 @@ Clock::Clock(long long int year, unsigned int day, unsigned int hour, unsigned i
 
 	this->month = 1;
 	this->dayOfMonth = 1;
-	this->timeZone = 1;
+	this->timeZone = 2;
 	
 	this->ms = 0;
 	this->clockLoop();
@@ -82,7 +82,7 @@ unsigned long long int Clock::getms()
 	);
 	unsigned long long int ms = (unsigned long long int)millisec.count();// +150000000;
 
-	ms = ms + timeZone * 3600;
+	ms = ms + timeZone * 3600000;
 	return ms;
 }
 
