@@ -10,7 +10,7 @@ public:
 	~Clock();
 
 private:
-	unsigned long int ms;
+	unsigned long long int ms;
 	bool displayClock;
 	bool leapYear;
 
@@ -33,7 +33,7 @@ private:
 
 public:
 	std::string getFormatTime();
-	unsigned long int getms();
+	unsigned long long int getms();
 	unsigned int getMonthSetDay();
 	std::string getMonthName(unsigned int monthNum);
 

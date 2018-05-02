@@ -22,7 +22,7 @@ Clock::Clock()
 	this->second = 0;
 	this->minute = 0;
 	this->hour = 0;
-	this->day = 0;
+	this->day = 1;
 	this->year = 0;
 
 	this->month = 1;
@@ -85,12 +85,12 @@ void Clock::clockLoop()
 }
 
 /// Return (milli)seconds since epoch (1970).
-unsigned long int Clock::getms()
+unsigned long long int Clock::getms()
 {
 	std::chrono::milliseconds millisec = std::chrono::duration_cast<std::chrono::milliseconds>(
 		std::chrono::system_clock::now().time_since_epoch()
 	);
-	unsigned long int now_ms = (unsigned long int)millisec.count()*3;// +150000000;
+	unsigned long long int now_ms = (unsigned long long int)millisec.count();// +150000000;
 	
 	//long double sysTime = time(0);
 	//long double sysTimeMS = sysTime * 1000;
@@ -202,6 +202,7 @@ std::string Clock::getFormatTime()
 	{
 		time += "0";
 	}
+	time += std::to_string(this->second);
 
 	return time;
 }
@@ -223,7 +224,7 @@ void Clock::updateClock()
 				if(this->leapYear)
 					daysInYear = 366;
 
-				if (this->day >= daysInYear - 1)
+				if (this->day >= daysInYear - 0)
 				{
 					/// Years
 					this->year++;
@@ -239,11 +240,11 @@ void Clock::updateClock()
 				return;
 			}
 			this->hour++;
-			minute = 0;
+			this->minute = 0;
 			return;
 		}
 		this->minute++;
-		second = 0;
+		this->second = 0;
 		return;
 	}
 	this->second++;
@@ -396,9 +397,9 @@ std::string Clock::getMonthName(unsigned int monthNum)
 void Clock::setTimeNow()
 {
 	std::cout << "Started time setting" << std::endl;
-	this->year += 1970;
-	unsigned long int now = this->getms() / 1;
-	unsigned long int start = now;
+	this->year = 1970;
+	unsigned long long int secondsFromEpoch = this->getms() / 1000;
+	unsigned long long int epochToStart = secondsFromEpoch;
 	int perCount = 1;
 	/*
 	for (unsigned long int i = 0; i < now; i++)
@@ -414,17 +415,17 @@ void Clock::setTimeNow()
 	}
 	*/
 	
-	while (now > 0)
+	while (secondsFromEpoch > 0)
 	{
 		/// Display how far in the time set process it has come.
-		if ((start - now) > perCount*0.1*start)
+		if ((epochToStart - secondsFromEpoch) > 5*perCount*0.01*epochToStart)
 		{
-			std::cout << perCount << "0%" << std::endl;
+			std::cout << 5*perCount << "%" << std::endl;
 			perCount++;
 		}
 			
 		this->updateClock();
-		now--;
+		secondsFromEpoch--;
 	}
 	
 	//this->year += 1970;
