@@ -84,16 +84,21 @@ unsigned long long int Clock::getms()
 	);
 	unsigned long long int ms = (unsigned long long int)millisec.count();// +150000000;
 
-	ms = ms + timeZone * 3600000 + 2 * 86400000;
+	ms = ms + timeZone * 3600000 + 2 * 86400000 - 27000;
 	return ms;
 }
 
 /// Check if clock needs an update (if 1 second has passed since last).
 bool Clock::updateNeeded()
 {
-	if (this->getms() <= this->ms + 1000)
+	bool needUpdate = true;
+	unsigned int thisMsMod = this->getms() % 1000;
+	if (thisMsMod < this->lastMsMod)
+	{
 		return false;
-	return true;
+	}
+	this->lastMsMod = thisMsMod;
+	return needUpdate;
 }
 
 /// Display the time.

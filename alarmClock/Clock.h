@@ -14,6 +14,7 @@ private:
 	bool displayClock;
 	bool leapYear;
 	int timeZone;
+	unsigned int lastMsMod = 0;
 
 	unsigned int second;
 	unsigned int minute;
