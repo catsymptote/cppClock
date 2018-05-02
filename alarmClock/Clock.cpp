@@ -65,7 +65,7 @@ void Clock::clockLoop()
 		if (this->updateNeeded())
 		{
 			this->ms = this->getms();
-			this->updateClock();
+			this->updateClock(1);
 			if (this->displayClock)
 			{
 				this->displayTime();
@@ -180,8 +180,24 @@ std::string Clock::getFormatTime()
 }
 
 /// Updates the numbers. Adds 1 second to time.
-void Clock::updateClock()
+void Clock::updateClock(unsigned int sec)
 {
+	/// Rough for seconds per day
+	if (sec == 86400)
+	{
+		this->incrementDay();
+		return;
+	}
+	
+	/// Recursion. Why? Because reasons!
+	if (!(sec == 86400 || sec == 1))
+	{
+		updateClock(1);
+		sec--;
+		return;
+	}
+	
+	/// Indicidual increments
 	/// Seconds
 	if (this->second >= 60 - 1)
 	{
@@ -191,26 +207,7 @@ void Clock::updateClock()
 			/// Hours
 			if (this->hour >= 24 - 1)
 			{
-				/// Days
-				unsigned int daysInYear = 365;
-				if(this->leapYear)
-					daysInYear++;
-
-				if (this->day >= daysInYear - 0)
-				{
-					/// Years
-					this->year++;
-					if (this->isLeapYear())
-						this->leapYear = true;
-					else
-						this->leapYear = false;
-					this->day = 1;
-					this->hour = 0;
-					this->minute = 0;
-					this->second = 0;
-					return;
-				}
-				this->day++;
+				this->incrementDay();
 				this->hour = 0;
 				this->minute = 0;
 				this->second = 0;
@@ -226,6 +223,33 @@ void Clock::updateClock()
 		return;
 	}
 	this->second++;
+	return;
+}
+
+/// Add a day to the year.
+void Clock::incrementDay()
+{
+	/// Leap year check
+	unsigned int daysInYear = 365;
+	if (this->leapYear)
+		daysInYear++;
+
+	/// If a year has passed
+	if (this->day >= daysInYear - 0)
+	{
+		/// Increment year
+		this->year++;
+		if (this->isLeapYear())
+			this->leapYear = true;
+		else
+			this->leapYear = false;
+		this->day = 1;
+		this->hour = 0;
+		this->minute = 0;
+		this->second = 0;
+		return;
+	}
+	this->day++;
 	return;
 }
 
@@ -388,9 +412,20 @@ void Clock::setTimeNow()
 			std::cout << 5*perCount << "%" << std::endl;
 			perCount++;
 		}
+		
+		if (secondsFromEpoch >= 86400)
+		{
 			
-		this->updateClock();
-		secondsFromEpoch--;
+			this->updateClock(86400);
+			secondsFromEpoch -= 86400;
+		}
+		else
+		{
+			this->updateClock(1);
+			secondsFromEpoch--;
+		}
+		
+		
 	}
 }
 

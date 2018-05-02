@@ -26,7 +26,8 @@ private:
 
 private:
 	bool updateNeeded();
-	void updateClock();
+	void updateClock(unsigned int sec);
+	void incrementDay();
 	void clockLoop();
 	void displayTime();
 	void setTimeNow();
