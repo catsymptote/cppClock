@@ -11,7 +11,16 @@ public:
 	~Clock();
 
 private:
+	const unsigned short int msPerSec		= 1000;
+	const unsigned short int secPerHour		= 3600;
+	const unsigned short int secPerDay		= 86400;
+	const unsigned short int secPerMin		= 60;
+	const unsigned short int minPerHour		= 60;
+	const unsigned short int hourPerDay		= 24;
+	const unsigned short int dayPerYear		= 365;
+	
 	unsigned long long int ms;
+	bool firstGetms = true;
 	bool displayClock;
 	bool leapYear;
 	int timeZone;
@@ -26,6 +35,7 @@ private:
 	unsigned int month;
 	unsigned int dayOfMonth;
 	long long int year;
+	int leapSec;
 
 private:
 	bool updateNeeded();
@@ -35,6 +45,7 @@ private:
 	void displayTime();
 	void setTimeNow();
 	bool isLeapYear();
+	int leapSecondAdder(unsigned long long int ms);
 
 public:
 	std::string getFormatTime();

@@ -72,8 +72,14 @@ unsigned long long int Clock::getms()
 	);
 	unsigned long long int ms = (unsigned long long int)millisec.count();
 
-	/// Add timeZone changer, add 2 days (because reasons), subtract 27 leap seconds.
-	ms = ms + timeZone * 3600000 + 2 * 86400000 - 27000;
+	/// Add timeZone changer, add 2 days (because reasons) and leap seconds.
+	if (firstGetms)
+	{
+		this->firstGetms = false;
+		this->leapSec = this->leapSecondAdder(ms);
+		std::cout << "leapSeconds: " << this->leapSec << std::endl;
+	}
+	ms += (timeZone * this->secPerHour + 2 * this->secPerDay - this->leapSec) * this->msPerSec;
 	this->ms = ms;
 	return ms;
 }
@@ -201,14 +207,14 @@ std::string Clock::getFormatTimeAsText2()
 void Clock::updateClock(unsigned int sec)
 {
 	/// Add entire days at a time.
-	if (sec == 86400)
+	if (sec == this->secPerDay)
 	{
 		this->incrementDay();
 		return;
 	}
 	
 	/// Recursion (because reasons).
-	if (!(sec == 86400 || sec == 1))
+	if (!(sec == this->secPerDay || sec == 1))
 	{
 		updateClock(1);
 		sec--;
@@ -217,13 +223,13 @@ void Clock::updateClock(unsigned int sec)
 	
 	/// Indicidual increments.
 	/// Seconds
-	if (this->second >= 60 - 1)
+	if (this->second >= this->secPerMin - 1)
 	{
 		/// Minutes
-		if (this->minute >= 60 - 1)
+		if (this->minute >= this->minPerHour - 1)
 		{
 			/// Hours
-			if (this->hour >= 24 - 1)
+			if (this->hour >= this->hourPerDay - 1)
 			{
 				this->incrementDay();
 				this->hour = 0;
@@ -248,7 +254,7 @@ void Clock::updateClock(unsigned int sec)
 void Clock::incrementDay()
 {
 	/// Leap year check
-	unsigned int daysInYear = 365;
+	unsigned int daysInYear = this->dayPerYear;
 	if (this->leapYear)
 		daysInYear++;
 
@@ -424,7 +430,7 @@ unsigned int Clock::getWeekNumber()
 /// Get weekday number (1, 2, ..)
 unsigned int Clock::getWeekdayNumber()
 {
-	unsigned int daysSinceEpoch = this->ms / (1000 * 86400);
+	unsigned int daysSinceEpoch = this->ms / (this->msPerSec * this->secPerDay);
 	return ((daysSinceEpoch +1) % 7) + 1;
 }
 
@@ -484,10 +490,10 @@ void Clock::setTimeNow()
 		}
 		
 		/// If more than 1 day, send entire day at once.
-		if (secondsFromEpoch >= 86400)
+		if (secondsFromEpoch >= this->secPerDay)
 		{
-			this->updateClock(86400);
-			secondsFromEpoch -= 86400;
+			this->updateClock(this->secPerDay);
+			secondsFromEpoch -= this->secPerDay;
 		}
 		/// If less than 1 day, send second by second.
 		else
@@ -510,4 +516,51 @@ bool Clock::isLeapYear()
 		isLeap = false;
 
 	return isLeap;
+}
+
+/// Handles adding leap seconds and conversion between NTP time and UNIX Epoch time.
+int Clock::leapSecondAdder(unsigned long long int ms)
+{
+	/// Assumes only positive (additive) leap seconds, not negative (subtractive).
+	const unsigned int NTPtoUnixEpoch = 2208988800;
+	unsigned long long int secondsSinceEpoch = ms / this->msPerSec;
+	const long int leapSeconds[] = {
+		2272060800,		// 1 Jan 1972
+		2287785600,		// 1 Jul 1972
+		2303683200,		// 1 Jan 1973
+		2335219200,		// 1 Jan 1974
+		2366755200,		// 1 Jan 1975
+		2398291200,		// 1 Jan 1976
+		2429913600,		// 1 Jan 1977
+		2461449600,		// 1 Jan 1978
+		2492985600,		// 1 Jan 1979
+		2524521600,		// 1 Jan 1980
+		2571782400,		// 1 Jul 1981
+		2603318400,		// 1 Jul 1982
+		2634854400,		// 1 Jul 1983
+		2698012800,		// 1 Jul 1985
+		2776982400,		// 1 Jan 1988
+		2840140800,		// 1 Jan 1990
+		2871676800,		// 1 Jan 1991
+		2918937600,		// 1 Jul 1992
+		2950473600,		// 1 Jul 1993
+		2982009600,		// 1 Jul 1994
+		3029443200,		// 1 Jan 1996
+		3076704000,		// 1 Jul 1997
+		3124137600,		// 1 Jan 1999
+		3345062400,		// 1 Jan 2006
+		3439756800,		// 1 Jan 2009
+		3550089600,		// 1 Jul 2012
+		3644697600,		// 1 Jul 2015
+		3692217600		// 1 Jan 2017
+	};
+	int leapSecondListSize = (sizeof(leapSeconds) / sizeof(*leapSeconds));
+	int leapSecondCount = 0;
+	for (int i = 0; i < leapSecondListSize; i++)
+	{
+		if (secondsSinceEpoch > leapSeconds[i] - NTPtoUnixEpoch)
+			leapSecondCount++;
+	}
+
+	return leapSecondCount;
 }
