@@ -98,6 +98,9 @@ bool Clock::updateNeeded()
 /// Display the time.
 void Clock::displayTime()
 {
+	/// Tips to update
+	// https://stackoverflow.com/questions/34842526/update-console-without-flickering-c/34843181?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+
 	/// Flush and clear screen.
 	system("CLS");
 
